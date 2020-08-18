@@ -14,6 +14,7 @@ class CPU:
         self.hlt = 1
         self.ldi = 130
         self.prn = 71
+        self.mul = 162
 
     def ram_read(self, mar):
         return self.ram[mar]
@@ -23,24 +24,23 @@ class CPU:
 
     def load(self):
         """Load a program into memory."""
-
         address = 0
 
-        # For now, we've just hardcoded a program:
+        with open(sys.argv[1]) as f:
+            for line in f:
+                line = line.strip()
+                temp = line.split()
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+                if len(temp) == 0:
+                    continue
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+                if temp[0][0] == "#":
+                    continue
+
+                instruction = int(temp[0], 2)
+
+                self.ram[address] = instruction
+                address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -88,6 +88,12 @@ class CPU:
 
             elif ir == self.ldi:
                 self.registers[operand_a] = operand_b
+                self.pc += 3
+
+            elif ir == self.mul:
+                product = self.registers[operand_a] * self.registers[operand_b]
+                self.registers[operand_a] = product
+
                 self.pc += 3
 
             elif ir == self.prn:
