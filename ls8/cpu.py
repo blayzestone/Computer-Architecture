@@ -10,11 +10,14 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.registers = [0] * 8
+        self.sp = 0xF4
         self.pc = 0
         self.hlt = 1
         self.ldi = 130
         self.prn = 71
         self.mul = 162
+        self.push = 69
+        self.pop = 70
 
     def ram_read(self, mar):
         return self.ram[mar]
@@ -83,6 +86,8 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
+            # print(self.registers)
+
             if ir == self.hlt:
                 running = False
 
@@ -99,3 +104,16 @@ class CPU:
             elif ir == self.prn:
                 print(self.registers[operand_a])
                 self.pc += 2
+
+            elif ir == self.push:
+                self.sp -= 1
+
+                self.ram_write(self.sp, self.registers[operand_a])
+
+                self.pc += 2
+
+            elif ir == self.pop:
+                self.registers[operand_a] = self.ram_read(self.sp)
+                self.sp += 1
+                self.pc += 2
+
